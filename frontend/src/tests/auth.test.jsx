@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "../context/AuthContext.jsx";
+import App from "../App.jsx";
 import Login from "../pages/Login.jsx";
 import Register from "../pages/Register.jsx";
 
@@ -135,6 +136,21 @@ describe("Register", () => {
 
     expect(
       await screen.findByText("Diese E-Mail-Adresse ist bereits registriert."),
+    ).toBeInTheDocument();
+  });
+});
+
+describe("Geschützte Routen", () => {
+  it("leitet nicht angemeldete Nutzer auf die Landing-Seite um", async () => {
+    window.history.pushState({}, "", "/wardrobe");
+    render(
+      <AuthProvider>
+        <App />
+      </AuthProvider>,
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "Office Closet" }),
     ).toBeInTheDocument();
   });
 });
