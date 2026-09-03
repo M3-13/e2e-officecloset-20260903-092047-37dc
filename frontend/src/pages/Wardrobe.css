@@ -1,0 +1,122 @@
+.wardrobe-add {
+  margin-bottom: var(--space-6);
+}
+
+.wardrobe-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .wardrobe-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-3);
+  }
+
+  .wardrobe-form .alert,
+  .wardrobe-form .btn {
+    grid-column: 1 / -1;
+  }
+}
+
+.file-input {
+  padding: var(--space-2) var(--space-3);
+}
+
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.category-badge {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+  font-family: var(--font-family);
+  font-size: 13px;
+  min-height: 36px;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.category-badge:hover {
+  color: var(--color-fg);
+  border-color: var(--color-accent);
+}
+
+.category-badge--active {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  border-color: var(--color-accent);
+}
+
+.wardrobe-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-3);
+}
+
+.item-card {
+  background: linear-gradient(180deg, #1a1612 0%, #14110d 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.item-card:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-2px);
+}
+
+.item-card__image {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  background: #12100c;
+  display: block;
+}
+
+.item-card__image--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.item-card__body {
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+}
+
+.item-card__name {
+  margin: 0;
+  font-size: 16px;
+  color: var(--color-fg);
+}
+
+.item-card__category {
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.item-card__delete {
+  margin-top: var(--space-2);
+  min-height: 40px;
+  padding: 8px 16px;
+}
