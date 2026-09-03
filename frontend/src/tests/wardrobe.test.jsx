@@ -116,6 +116,39 @@ describe("Wardrobe", () => {
     expect(screen.getByText("Weiße Bluse")).toBeInTheDocument();
   });
 
+  it("hängt beim Anlegen eine ausgewählte Bilddatei an den Multipart-Body", async () => {
+    const user = userEvent.setup();
+    mockClient.get.mockResolvedValue([]);
+    mockClient.post.mockResolvedValue({
+      id: 11,
+      name: "Mit Bild",
+      category: "Kleid",
+      image_url: "/uploads/mitbild.jpg",
+    });
+    render(<Wardrobe />);
+
+    await screen.findByText("Noch keine Kleidungsstücke");
+
+    const imageFile = new File(["bildinhalt"], "kleid.jpg", {
+      type: "image/jpeg",
+    });
+
+    await user.type(screen.getByLabelText("Name"), "Mit Bild");
+    await user.selectOptions(screen.getByLabelText("Kategorie"), "Kleid");
+    await user.upload(screen.getByLabelText("Bild (optional)"), imageFile);
+    await user.click(screen.getByRole("button", { name: "Hinzufügen" }));
+
+    expect(await screen.findByText("Mit Bild")).toBeInTheDocument();
+
+    expect(mockClient.post).toHaveBeenCalledTimes(1);
+    const [path, body] = mockClient.post.mock.calls[0];
+    expect(path).toBe("/items");
+    expect(body).toBeInstanceOf(FormData);
+    expect(body.get("name")).toBe("Mit Bild");
+    expect(body.get("category")).toBe("Kleid");
+    expect(body.get("image")).toBe(imageFile);
+  });
+
   it("zeigt bei einer zu großen Datei (413) eine verständliche Meldung", async () => {
     const user = userEvent.setup();
     mockClient.get.mockResolvedValue([]);
