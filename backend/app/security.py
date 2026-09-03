@@ -32,7 +32,7 @@ def create_access_token(user_id: int) -> str:
     settings = get_settings()
     now = datetime.now(UTC)
     payload = {
-        "sub": user_id,
+        "sub": str(user_id),
         "exp": now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     }
     return jwt.encode(payload, settings.secret_key, algorithm="HS256")
