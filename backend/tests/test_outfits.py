@@ -1,27 +1,12 @@
-from datetime import UTC, datetime, timedelta
-
-import jwt
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.config import get_settings
 from app.database import Base, get_db
 from app.main import app
 from app.models import Item, User
-from app.security import hash_password
-
-
-def _make_token(user_id: int) -> str:
-    return jwt.encode(
-        {
-            "sub": str(user_id),
-            "exp": datetime.now(UTC) + timedelta(minutes=60),
-        },
-        get_settings().secret_key,
-        algorithm="HS256",
-    )
+from app.security import create_access_token, hash_password
 
 
 def _auth(token: str) -> dict[str, str]:
@@ -75,7 +60,7 @@ def test_create_list_open_delete_outfit(env) -> None:
     pants = _create_item(db, user, "Hose", "Unterteil")
     db.close()
 
-    headers = _auth(_make_token(user.id))
+    headers = _auth(create_access_token(user.id))
 
     response = client.post(
         "/api/outfits",
@@ -114,7 +99,7 @@ def test_create_outfit_rejects_foreign_items(env) -> None:
     foreign_item = _create_item(db, other, "Fremde Hose")
     db.close()
 
-    headers = _auth(_make_token(owner.id))
+    headers = _auth(create_access_token(owner.id))
     response = client.post(
         "/api/outfits",
         json={"name": "Kaputt", "item_ids": [my_item.id, foreign_item.id]},
@@ -135,11 +120,11 @@ def test_foreign_user_cannot_access_outfit(env) -> None:
     response = client.post(
         "/api/outfits",
         json={"name": "Gala", "item_ids": [item.id]},
-        headers=_auth(_make_token(owner.id)),
+        headers=_auth(create_access_token(owner.id)),
     )
     outfit_id = response.json()["id"]
 
-    other_headers = _auth(_make_token(other.id))
+    other_headers = _auth(create_access_token(other.id))
 
     response = client.get(f"/api/outfits/{outfit_id}", headers=other_headers)
     assert response.status_code == 404
