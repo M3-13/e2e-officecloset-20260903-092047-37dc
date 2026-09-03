@@ -88,6 +88,20 @@ def test_create_item_without_image(client):
     assert body["image_url"] is None
 
 
+def test_create_item_multipart_without_file(client):
+    c, make_user, auth = client
+    user = make_user()
+    resp = c.post(
+        "/api/items",
+        files={"name": (None, "Hose"), "category": (None, "Unterteil")},
+        headers=auth(user),
+    )
+    assert resp.status_code == 201
+    body = resp.json()
+    assert body["name"] == "Hose"
+    assert body["image_url"] is None
+
+
 def test_list_items_filtered_by_category(client):
     c, make_user, auth = client
     user = make_user()
@@ -126,13 +140,31 @@ def test_foreign_user_cannot_see_or_delete_items(client):
 
 
 def test_create_item_too_large_returns_413(client, monkeypatch):
-    monkeypatch.setenv("MAX_UPLOAD_MB", "0")
+    monkeypatch.setenv("MAX_UPLOAD_MB", "1")
     c, make_user, auth = client
     user = make_user()
+    # Far over the 1 MiB limit so the whole body exceeds the pre-parse cap.
+    oversized = PNG_HEADER + b"\x00" * (2 * 1024 * 1024)
     resp = c.post(
         "/api/items",
         data={"name": "Blazer", "category": "Oberteil"},
-        files={"image": ("blazer.png", PNG_HEADER, "image/png")},
+        files={"image": ("blazer.png", oversized, "image/png")},
+        headers=auth(user),
+    )
+    assert resp.status_code == 413
+    assert c.get("/api/items", headers=auth(user)).json() == []
+
+
+def test_create_item_file_just_over_limit_returns_413(client, monkeypatch):
+    monkeypatch.setenv("MAX_UPLOAD_MB", "1")
+    c, make_user, auth = client
+    user = make_user()
+    # Over the 1 MiB file limit, but under the body cap (1 MiB + framing).
+    over = PNG_HEADER + b"\x00" * (1024 * 1024)
+    resp = c.post(
+        "/api/items",
+        data={"name": "Blazer", "category": "Oberteil"},
+        files={"image": ("blazer.png", over, "image/png")},
         headers=auth(user),
     )
     assert resp.status_code == 413
