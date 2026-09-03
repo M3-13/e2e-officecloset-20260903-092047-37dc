@@ -6,11 +6,79 @@
       "dir": "frontend",
       "stack": "web-vite",
       "kind": "server",
-      "install": [["npm", "install"]],
-      "start": ["node", "node_modules/vite/bin/vite.js", "--host", "127.0.0.1", "--port", "${PORT}"],
+      "install": [
+        [
+          "npm",
+          "install"
+        ]
+      ],
+      "start": [
+        "node",
+        "node_modules/vite/bin/vite.js",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "${PORT}"
+      ],
       "port": 5173,
       "port_env": "PORT",
-      "health": { "path": "/", "expect_status": [200] }
+      "health": {
+        "path": "/",
+        "expect_status": [
+          200
+        ]
+      }
+    },
+    {
+      "name": "backend",
+      "dir": "backend",
+      "stack": "python",
+      "kind": "server",
+      "install": [
+        [
+          "${python}",
+          "-m",
+          "pip",
+          "install",
+          "-q",
+          "-r",
+          "requirements.txt"
+        ]
+      ],
+      "start": [
+        "${python}",
+        "-m",
+        "uvicorn",
+        "app.main:app",
+        "--port",
+        "${PORT}"
+      ],
+      "port": 8000,
+      "port_env": "PORT",
+      "health": {
+        "path": "/api/health",
+        "expect_status": [
+          200
+        ]
+      },
+      "env": {
+        "DATABASE_URL": {
+          "dev": "sqlite:///./dev.db"
+        },
+        "SECRET_KEY": {
+          "generate": "hex",
+          "bytes": 32
+        },
+        "UPLOAD_DIR": {
+          "dev": "./uploads"
+        },
+        "FRONTEND_ORIGIN": {
+          "dev": "http://localhost:5173"
+        },
+        "MAX_UPLOAD_MB": {
+          "dev": "5"
+        }
+      }
     }
   ]
 }
