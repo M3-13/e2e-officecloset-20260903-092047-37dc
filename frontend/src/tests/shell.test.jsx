@@ -79,12 +79,12 @@ describe("App-Shell", () => {
     ).toBeInTheDocument();
   });
 
-  it("leitet nicht angemeldete Nutzer von geschützten Routen zur Login-Seite", async () => {
+  it("leitet nicht angemeldete Nutzer von geschützten Routen zur Landing-Seite", async () => {
     window.history.pushState({}, "", "/wardrobe");
     renderApp();
 
     expect(
-      await screen.findByRole("heading", { name: "Anmelden" }),
+      await screen.findByRole("heading", { name: "Office Closet" }),
     ).toBeInTheDocument();
   });
 
